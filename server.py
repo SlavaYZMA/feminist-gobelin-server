@@ -1,41 +1,25 @@
 import os
 from flask import Flask, request, jsonify
-from flask_cors import CORS
 from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
+from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app, resources={r"/generate": {"origins": "*"}})  # Разрешаем CORS для всех запросов
+CORS(app, resources={r"/generate": {"origins": "*"}})
 
-# Загружаем модель и токенизатор
-try:
-    model = AutoModelForCausalLM.from_pretrained("SlavaYZMA/feminist-gobelin-model", use_safetensors=True)
-tokenizer = AutoTokenizer.from_pretrained("SlavaYZMA/feminist-gobelin-model")
-    tokenizer.pad_token = tokenizer.eos_token
-    print("Модель загружена успешно!")
-except Exception as e:
-    print(f"Ошибка загрузки модели: {e}")
+print("Загружаю модель...")
+model = AutoModelForCausalLM.from_pretrained("SlavaYZMA/feminist-gobelin-model", use_safetensors=True, token=os.environ.get("HF_TOKEN"))
+tokenizer = AutoTokenizer.from_pretrained("SlavaYZMA/feminist-gobelin-model", token=os.environ.get("HF_TOKEN"))
+print("Модель загружена успешно!")
 
-@app.route('/generate', methods=['POST', 'OPTIONS'])
+@app.route('/generate', methods=['POST'])
 def generate():
-    if request.method == 'OPTIONS':
-        return '', 200
-    try:
-        data = request.json
-        prompt = data.get('prompt', '')
-        if not prompt:
-            return jsonify({'error': 'Пустой запрос'}), 400
-        inputs = tokenizer(prompt, return_tensors="pt")
-        outputs = model.generate(
-            **inputs,
-            max_length=50,
-            num_beams=5,
-            no_repeat_ngram_size=2,
-            early_stopping=True
-        )
-        response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        return jsonify({'response': response})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    data = request.get_json()
+    prompt = data.get('prompt', '')
+    inputs = tokenizer(prompt, return_tensors="pt")
+    outputs = model.generate(**inputs, max_length=100)
+    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    return jsonify({'response': response})
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
