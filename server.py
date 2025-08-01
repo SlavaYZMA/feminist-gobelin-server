@@ -5,7 +5,7 @@ import torch
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app, resources={r"/generate": {"origins": "*"}})
+CORS(app, resources={r"/generate": {"origins": os.environ.get("CORS_ORIGINS", "*")}})
 
 print("Загружаю модель...")
 model = AutoModelForCausalLM.from_pretrained("SlavaYZMA/feminist-gobelin-model", use_safetensors=True, token=os.environ.get("HF_TOKEN"))
