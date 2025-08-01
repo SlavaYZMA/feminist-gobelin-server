@@ -8,8 +8,8 @@ CORS(app, resources={r"/generate": {"origins": "*"}})  # Разрешаем CORS
 
 # Загружаем модель и токенизатор
 try:
-    model = AutoModelForCausalLM.from_pretrained("./my_feminist_model", use_safetensors=True)
-    tokenizer = AutoTokenizer.from_pretrained("./my_feminist_model")
+    model = AutoModelForCausalLM.from_pretrained("SlavaYZMA/feminist-gobelin-model", use_safetensors=True)
+tokenizer = AutoTokenizer.from_pretrained("SlavaYZMA/feminist-gobelin-model")
     tokenizer.pad_token = tokenizer.eos_token
     print("Модель загружена успешно!")
 except Exception as e:
