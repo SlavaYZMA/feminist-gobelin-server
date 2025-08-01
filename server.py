@@ -4,7 +4,7 @@ from flask_cors import CORS
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 app = Flask(__name__)
-CORS(app)  # Разрешаем CORS для всех запросов
+CORS(app, resources={r"/generate": {"origins": "*"}})  # Разрешаем CORS для всех запросов
 
 # Загружаем модель и токенизатор
 try:
